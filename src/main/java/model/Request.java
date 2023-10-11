@@ -1,4 +1,4 @@
-package ru.antonenko.MySecondTestAppSpringBoot.model;
+package model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -33,4 +33,17 @@ public class Request{
     private int templateId;
     private int productCode;
     private int smsCode;
+    @Override
+    public String toString() {
+
+        return "{"
+                +"uid='"+operationUid+'\''+
+                ", systemName='"+systemName+'\''+
+                ", systemTime='"+systemTime+'\''+
+                ", source='"+source+'\''+
+                ", communicationId="+communicationId+", templateId=" + templateId+
+                ", productCode="+productCode+
+                ", smsCode=" +smsCode+
+                '}';
+    }
 }

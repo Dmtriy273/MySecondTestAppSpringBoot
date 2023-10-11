@@ -1,69 +1,75 @@
 package ru.antonenko.MySecondTestAppSpringBoot.controller;
 
+
+import lombok.extern.slf4j.Slf4j;
+import model.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import ru.antonenko.MySecondTestAppSpringBoot.exception.UnsupportedCodeException;
 import ru.antonenko.MySecondTestAppSpringBoot.exception.ValidationFailedException;
-import ru.antonenko.MySecondTestAppSpringBoot.model.Request;
-import ru.antonenko.MySecondTestAppSpringBoot.model.Response;
-import ru.antonenko.MySecondTestAppSpringBoot.service.UnsupportedCodeService;
+import ru.antonenko.MySecondTestAppSpringBoot.model.*;
 import ru.antonenko.MySecondTestAppSpringBoot.service.ValidationService;
+import ru.antonenko.MySecondTestAppSpringBoot.util.DateTimeUtil;
+import ru.antonenko.MySecondTestAppSpringBoot.service.ModifyResponseService;
+
 
 import javax.validation.Valid;
-import java.nio.channels.FileLock;
-import java.text.SimpleDateFormat;
+import java.util.Date;
 
+@Slf4j
 @RestController
 public class MyController {
 
     private final ValidationService validationService;
-    private final UnsupportedCodeService unsupportedCodeService;
+    private final ModifyResponseService modifyResponseService;
 
     @Autowired
-    public MyController(ValidationService validationService, UnsupportedCodeService unsupportedCodeService){
+    public MyController(ValidationService validationService,
+                        @Qualifier("ModifySystemTimResponseService") ModifyResponseService modifyResponseService){
         this.validationService = validationService;
-        this.unsupportedCodeService = unsupportedCodeService;
+        this.modifyResponseService = modifyResponseService;
     }
     
     @PostMapping(value = "/feedback")
     public ResponseEntity<Response> feedback(@Valid @RequestBody Request request,
                                              BindingResult bindingResult){
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-        
+        log.info("request: {}", request);
+
         Response response = Response.builder()
                 .uid(request.getUid())
                 .operationUid(request.getOperationUid())
-                .systemTime(request.getSystemTime())
-                .code("success")
-                .errorCode("")
-                .errorMessage("")
+                .systemTime(DateTimeUtil.getCustomFormat().format(new Date()))
+                .code(Codes.SUCCESS)
+                .errorCode(ErrorCodes.EMPTY)
+                .errorMessage(ErrorMessages.EMPTY)
                 .build();
-        try {
-            unsupportedCodeService.isValid(request.getUid());
-        } catch (UnsupportedCodeException e) {
-            response.setCode("failed");
-            response.setErrorCode("UnsupportedCodeException");
-            response.setErrorMessage(e.getMessage());
-            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-        }
+
+        log.info("response: {}", response);
+
         try {
             validationService.isValid(bindingResult);
-        } catch (ValidationFailedException e){
-            response.setCode("failed");
-            response.setErrorCode("ValidationException");
-            response.setErrorMessage("Ошибка валидации");
+
+        } catch (ValidationFailedException e) {
+
+            response.setCode(Codes.FAILED);
+            response.setErrorCode(ErrorCodes.VALIDATION_EXCEPTION);
+            response.setErrorMessage(ErrorMessages.VALIDATION);
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+
         } catch (Exception e){
-            response.setCode("failed");
-            response.setErrorCode("UnknownException");
-            response.setErrorMessage("Произошла непредвиденная ошибка");
+
+            response.setCode(Codes.FAILED);
+            response.setErrorCode(ErrorCodes.UNKNOWN_EXCEPTION);
+            response.setErrorMessage(ErrorMessages.UNKNOWN);
             return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        modifyResponseService.modify(response);
+
+        return new ResponseEntity<>(modifyResponseService.modify(response), HttpStatus.OK);
     }
 }
