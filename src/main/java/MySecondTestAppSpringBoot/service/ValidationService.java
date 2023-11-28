@@ -1,8 +1,8 @@
-package ru.antonenko.MySecondTestAppSpringBoot.service;
+package MySecondTestAppSpringBoot.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
-import ru.antonenko.MySecondTestAppSpringBoot.exception.ValidationFailedException;
+import MySecondTestAppSpringBoot.exception.ValidationFailedException;
 
 @Service
 public interface ValidationService {
