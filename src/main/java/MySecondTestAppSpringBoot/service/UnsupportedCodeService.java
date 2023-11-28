@@ -1,7 +1,7 @@
-package ru.antonenko.MySecondTestAppSpringBoot.service;
+package MySecondTestAppSpringBoot.service;
 
 import org.springframework.stereotype.Service;
-import ru.antonenko.MySecondTestAppSpringBoot.exception.UnsupportedCodeException;
+import MySecondTestAppSpringBoot.exception.UnsupportedCodeException;
 
 @Service
 public interface UnsupportedCodeService {

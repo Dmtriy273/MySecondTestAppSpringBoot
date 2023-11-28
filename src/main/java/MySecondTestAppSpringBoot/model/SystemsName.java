@@ -1,15 +1,18 @@
-package model;
+package MySecondTestAppSpringBoot.model;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 
-public enum Systems {
-    ERP ("Enterprise Resource Planning"),
-    CRM ("Customer Relationship Management"),
-    WMS ("Warehouse Management System");
+public enum SystemsName {
+    ERP("Enterprise Resource Planning"),
+    CRM("Customer Relationship Management"),
+    ABC("123"),
+    WMS("Warehouse Management System");
+
 
     private final String name;
 
-    Systems(String name) {
+
+    SystemsName(String name) {
         this.name = name;
     }
 
@@ -20,6 +23,7 @@ public enum Systems {
 
     @Override
     public String toString() {
+
         return name;
     }
 }
